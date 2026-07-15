@@ -1,0 +1,10 @@
+services:
+    
+  php:
+    image: php # используем официальный образ php https://hub.docker.com/_/php 
+    ports:
+      - 8080:8080 # пробрасываем порт 8080
+    volumes:
+      - ../src:/mySite # монтируем нашу папку src в контейнер в папку /mySite
+    working_dir: /mySite/public # переключаемся в public папку в контейнере
+    entrypoint: [php, -S, 0.0.0.0:8080] # запускаем встроенный сервер php на 8080 порту
