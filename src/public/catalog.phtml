@@ -1,0 +1,6 @@
+<div>
+    <?php foreach ($products as $id => $p): ?>
+        <a href="?id=<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($p['name']) ?><br><br>
+        </a>
+    <?php endforeach ?>
+</div>

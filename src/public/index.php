@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function ob_include() : string
+function ob_include(): string
 {
     extract(func_get_arg(1));
     ob_start();
@@ -9,44 +9,40 @@ function ob_include() : string
     return ob_get_clean();
 }
 
-$product_0= [
-    'name' => 'L\'Oreal Шампунь для плотности длинных волос, 500 мл',
-    'price' => '700', //7.00 руб
-    'desc' => 'Шампунь разработан специально для тех, кто мечтает о красивых 
-    и длинных волосах.'
-];
+// Создаем функцию product, которая выводит конкретный товар из базы данных, выбранный пользователем
+function product($id, $products): string
+{
+    return ob_include('product.phtml', ['p' => $products[$id]]);
+}
 
-$product_1 = [
-    'name' => 'INSIGHT Шампунь для сухих волос, 350 мл',
-    'price' => '1000',// 10.00 руб
-    'desc' => 'Шампунь с питательными свойствами, гарантирует глубокое восстановление
-    волосяного волокна, укрепляет волосы и улучшает общее состояние и здоровье волос.'
-];
-// Создаем общий массив для всех товаров
-$products = [
-    0 => $product_0,
-    1 => $product_1
-];
+// Создаем функцию catalog, которая выводит список всех товаров из базы данных
+function catalog($products): string
+{
+    ob_start();
+    require 'catalog.phtml';
+    return ob_get_clean();
+}
 
-// Проверяем передан ли ID в запросе и являеться ли целым числом
-if (isset($_GET['id']) && ($id = filter_var($_GET['id'], FILTER_VALIDATE_INT) !== false )) {  
+// Подключаем базу данных из файла database.php
+require_once 'database.php';
 
 // Сохраняем переданное ID в переменную $id
-    $id = $_GET['id'];  
+$id = $_GET['id'] ?? null;
 
-// Проверяем, входит ли ID в диапазон существующих товаров: если да,выводи товар
-    if (0 <= $id && $id < count($products)) {
-        $html_1 = ob_include('product.phtml', ['p' => $products[$id]]);
-// Если ID не входит в диапазон существующих товаров: выводим 'Товар не найден'
+// Если ID не равен null, проверяем наличие товара в базе данных
+if ($id !== null) {
+    
+    // Если товар существует в базе данных, выводим его
+    if (isset($products[$id])) {
+        $html_1 = product($id, $products);
+    
+    // Если товара нет в базе каталога
     } else {
         $html_1 = 'Товар не найден';
     }
-// Если ID вообще не передан, выводим кликабельный список всех товаров
-} elseif (!isset($_GET['id'])) {
-// Создаем переменную, в которую цикл будет складывать ссылки на товары
-    $html_1 = '';
-    foreach ($products as $key => $value) {
-        $html_1 .= "<a href='index.php?id=$key'>$value[name]</a><br>";
-    }                           
-}
+
+// Если ID не был передан, выводим всю базу данных
+} else {
+    $html_1 = catalog($products);
+}  
 echo ob_include('layout.phtml', ['content' => $html_1]);
